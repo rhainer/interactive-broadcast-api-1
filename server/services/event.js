@@ -150,6 +150,7 @@ const getSessions = async (admin) => {
  * @param {String} data.hostUrl
  * @param {String} data.name
  * @param {String} data.rtmpUrl
+ * @param {String} data.smsNumber
  * @param {String} data.uncomposed
  */
 const create = async (data) => {

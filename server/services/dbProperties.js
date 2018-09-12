@@ -40,6 +40,7 @@ const eventProps = [
   'showEndedAt',
   'adminId',
   'rtmpUrl',
+  'smsNumber',
   'createdAt',
   'updatedAt'
 ];
