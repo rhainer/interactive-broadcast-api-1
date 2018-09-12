@@ -115,6 +115,13 @@ const saveEvent = async (data) => {
   await db.ref(`events/${id}`).set(buildEvent(eventProps, R.mergeAll([timestampCreate, {
     id
   }, data])));
+  const smsid = data.smsNumber;
+  try {
+    await db.ref(`smsNumbers/${smsid}`).set(id);
+  }
+  catch (error) {
+    throw new Error('Failed to write sms data');
+  }
   return await getEvent(id);
 };
 
