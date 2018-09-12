@@ -35,11 +35,11 @@ const createOTInstance = (apiKey, apiSecret) => {
  * Get the OT instance for a project (apiKey)
  * @param {String} apiKey
  * @param {String} apiSecret
- * @param {Boolean} descryptSecret
+ * @param {Boolean} decryptSecret
  */
-const otInstance = (apiKey, apiSecret, descryptSecret = true) => {
+const otInstance = (apiKey, apiSecret, decryptSecret = true) => {
   if (OT[apiKey]) { return OT[apiKey]; }
-  const secret = descryptSecret ? decrypt(apiSecret) : apiSecret;
+  const secret = decryptSecret ? decrypt(apiSecret) : apiSecret;
   const ot = createOTInstance(apiKey, secret);
   OT[apiKey] = ot;
   return ot;
@@ -68,12 +68,12 @@ const createToken = (apiKey, apiSecret, sessionId, options) => {
  * Returns a new OpenTok session, along with the corresponding OpenTok API key.
  * @param {Object} ot - An instance of the OpenTok SDK
  * @param {Object} options for the token creation
- * @param {Boolean} descryptSecret
+ * @param {Boolean} decryptSecret
  * @returns {Promise} <Resolve => {Object}, Reject => {Error}>
  */
-const createSession = (apiKey, apiSecret, descryptSecret = true) =>
+const createSession = (apiKey, apiSecret, decryptSecret = false) =>
   new Promise((resolve, reject) => {
-    const ot = otInstance(apiKey, apiSecret, descryptSecret);
+    const ot = otInstance(apiKey, apiSecret, decryptSecret);
     const onCreate = (err, session) => (err ? reject(err) : resolve(session));
     ot.createSession(defaultSessionOptions, onCreate);
   });
