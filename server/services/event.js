@@ -114,7 +114,7 @@ const saveEvent = async (data) => {
   const id = db.ref('events').push().key;
   await db.ref(`events/${id}`).set(buildEvent(eventProps, R.mergeAll([timestampCreate, {
     id
-  }, data])));
+}, data])));
   return await getEvent(id);
 };
 

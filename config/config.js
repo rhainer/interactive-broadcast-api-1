@@ -45,6 +45,8 @@ const config = {
   firebaseDatabaseURL: envVars.FIREBASE_DATABASE_URL,
   firebaseStorageBucket: envVars.FIREBASE_STORAGE_BUCKET,
   interactiveStreamLimit: envVars.INTERACTIVE_STREAM_LIMIT || Infinity,
+  nexmoApiKey: envVars.NEXMO_KEY,
+  nexmoSecret: envVars.NEXMO_SECRET,
   bucketUrl: envVars.BUCKET_URL,
   encryptPassword: envVars.ENCRYPT_PASSWORD,
 };
