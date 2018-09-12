@@ -40,6 +40,9 @@ const eventProps = [
   'showEndedAt',
   'adminId',
   'rtmpUrl',
+  'smsNumber',
+  'confBridgeNumber',
+  'confBridgePIN',
   'createdAt',
   'updatedAt'
 ];

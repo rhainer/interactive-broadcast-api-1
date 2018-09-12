@@ -114,7 +114,20 @@ const saveEvent = async (data) => {
   const id = db.ref('events').push().key;
   await db.ref(`events/${id}`).set(buildEvent(eventProps, R.mergeAll([timestampCreate, {
     id
-}, data])));
+  }, data])));
+  const smsid = data.smsNumber;
+  try {
+    await db.ref(`smsNumbers/${smsid}`).set(id);
+  } catch (error) {
+    throw new Error('Failed to write sms data');
+  }
+  const confBridgeNum = data.confBridgeNumber;
+  const confBridgePIN = data.confBridgePIN;
+  try {
+    await db.ref(`conferenceBridgeNumbers/${confBridgeNum}/${confBridgePIN}`).set(id);
+  } catch (error) {
+    throw new Error('Failed to write sms data');
+  }
   return await getEvent(id);
 };
 
@@ -150,6 +163,7 @@ const getSessions = async (admin) => {
  * @param {String} data.hostUrl
  * @param {String} data.name
  * @param {String} data.rtmpUrl
+ * @param {String} data.smsNumber
  * @param {String} data.uncomposed
  */
 const create = async (data) => {
