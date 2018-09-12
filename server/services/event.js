@@ -195,6 +195,11 @@ const update = async (id, data) => {
   const currentImages = getImages((await db.ref(`events/${id}`).once('value')).val());
   updateImages(currentImages, getImages(data));
   await db.ref(`events/${id}`).update(buildEvent(eventProps, R.merge(timestampUpdate, data)));
+  const smsid = data.smsNumber;
+  await db.ref(`smsNumbers/${smsid}`).set(id);
+  const confBridgeNum = data.confBridgeNumber;
+  const confBridgePIN = data.confBridgePIN;
+  await db.ref(`conferenceBridgeNumbers/${confBridgeNum}/${confBridgePIN}`).set(id);
   return getEvent(id);
 };
 
