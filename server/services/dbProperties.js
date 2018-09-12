@@ -41,6 +41,8 @@ const eventProps = [
   'adminId',
   'rtmpUrl',
   'smsNumber',
+  'confBridgeNumber',
+  'confBridgePIN',
   'createdAt',
   'updatedAt'
 ];

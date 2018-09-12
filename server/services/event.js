@@ -122,6 +122,14 @@ const saveEvent = async (data) => {
   catch (error) {
     throw new Error('Failed to write sms data');
   }
+  const confBridgeNum = data.confBridgeNumber;
+  const confBridgePIN = data.confBridgePIN;
+  try {
+    await db.ref(`conferenceBridgeNumbers/${confBridgeNum}/${confBridgePIN}`).set(id);
+  }
+  catch (error) {
+    throw new Error('Failed to write sms data');
+  }
   return await getEvent(id);
 };
 
