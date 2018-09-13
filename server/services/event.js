@@ -530,8 +530,7 @@ const sendSMS = async (message) => {
  * @param {String} eventId
  */
 const startSIP = async (eventId) => {
-  console.log("HEHEHREHRHERHEREHRE", eventId);
-  return await Promise.resolve({ tim: 'pike' });
+
   const snapshot = await db.ref(`events/${eventId}`);
   const event = snapshot.val();
   if (!event) {
@@ -545,17 +544,17 @@ const startSIP = async (eventId) => {
   const sessionId = event.stageSessionId;
   const { otApiKey, otSecret } = admin;
   const url = `https://api.opentok.com/v2/project/${otApiKey}/dial`;
-  const token = OpenTok.createToken(otApiKey, otSecret, stageSessionId);
+  const token = OpenTok.createToken(otApiKey, otSecret, sessionId, { role: 'subscriber' });
   const data = {
     sessionId,
     token,
     sip: {
-      uri: '',
-      from: '',
+      uri: `sip:+${12016958133}@sip.nexmo.com;transport=tls`,
+      from: '12016958133@opentok.com',
       headers: {},
       auth: {
-        username: '',
-        password: '',
+        username: '8127ee63',
+        password: 'tdT8NzkO5UNk5n0H',
       },
       secure: false,
     },
@@ -587,6 +586,11 @@ const stopSIP = () => {
 
 };
 
+const answerSIP = (data) => {
+    console.dir(data);
+    return {};
+};
+
 export {
   getEvents,
   create,
@@ -605,6 +609,7 @@ export {
   createTokenByUserType,
   getEventsByAdmin,
   sendSMS,
+  answerSIP,
   startSIP,
   stopSIP,
 };
