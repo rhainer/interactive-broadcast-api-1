@@ -115,9 +115,8 @@ const saveEvent = async (data) => {
   await db.ref(`events/${id}`).set(buildEvent(eventProps, R.mergeAll([timestampCreate, {
     id
   }, data])));
-  const smsid = data.smsNumber;
   try {
-    await db.ref(`smsNumbers/${smsid}`).set(id);
+    await db.ref(`smsNumbers/${data.smsNumber}`).set(id);
   } catch (error) {
     throw new Error('Failed to write sms data');
   }
@@ -495,6 +494,32 @@ const createTokenByUserType = async (adminId, userType) => {
   return null;
 };
 
+const sendSMS = async (message) => {
+  const messageContent = R.prop('text', message);
+  if (R.isEmpty(messageContent)) {
+    return;
+  }
+  const snapshot = await db.ref('smsNumbers').child(message.to).once('value');
+  const eventId = snapshot.val();
+  if (eventId) {
+    const eventSnapshot = await db.ref('events').child(eventId).once('value');
+    const event = eventSnapshot.val();
+    const status = R.propOr('', 'status', event);
+    if (status === 'preshow' || status === 'live') {
+      const adminSnapshot = await db.ref(`admins/${event.adminId}`).once('value');
+      const admin = adminSnapshot.val();
+      if (admin) {
+        const { otApiKey, otSecret } = admin;
+        const connectionPath = `activeBroadcasts/${event.adminId}/${event.name}/producerConnection`;
+        const connectionSnapshot = await db.ref(connectionPath).once('value');
+        const producerConnection = connectionSnapshot.val();
+        await OpenTok.signal(otApiKey, otSecret, event.sessionId, producerConnection, messageContent);
+      }
+    }
+  }
+  return;
+};
+
 export {
   getEvents,
   create,
@@ -511,5 +536,6 @@ export {
   buildEventKey,
   getMostRecentEvent,
   createTokenByUserType,
-  getEventsByAdmin
+  getEventsByAdmin,
+  sendSMS
 };

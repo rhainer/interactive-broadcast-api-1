@@ -37,7 +37,7 @@ const createOTInstance = (apiKey, apiSecret) => {
  * @param {String} apiSecret
  * @param {Boolean} decryptSecret
  */
-const otInstance = (apiKey, apiSecret, decryptSecret = true) => {
+const otInstance = (apiKey, apiSecret, decryptSecret = false) => {
   if (OT[apiKey]) { return OT[apiKey]; }
   const secret = decryptSecret ? decrypt(apiSecret) : apiSecret;
   const ot = createOTInstance(apiKey, secret);
@@ -113,11 +113,29 @@ const otRoles = {
   SUBSCRIBER: 'subscriber',
 };
 
+/**
+ *
+ * @param {String} apiKey
+ * @param {String} apiSecret
+ * @param {String} sessionId
+ * @param {String} connectionId
+ * @param {String} data
+ */
+const signal = (apiKey, apiSecret, sessionId, connectionId, message) => {
+  const ot = otInstance(apiKey, apiSecret);
+  ot.signal(sessionId, connectionId, { type: 'fanSMS', data: JSON.stringify({ message }) }, (error) => {
+    if (error) {
+      console.log('Failed to send fan sms signal to producer', error);
+    }
+  });
+};
+
 module.exports = {
   createOTInstance,
   createSession,
   createToken,
   startArchive,
   stopArchive,
+  signal,
   otRoles
 };

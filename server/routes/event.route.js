@@ -20,6 +20,7 @@ const createTokenFan = getAPIResponse(req => Event.createTokenFan(req.body.admin
 const createTokenHostCeleb = userType =>
   getAPIResponse(req => Event.createTokenHostCeleb(req.body.adminId, userType === 'host' ? req.body.hostUrl : req.body.celebrityUrl, userType));
 const createTokenByUserType = getAPIResponse(req => Event.createTokenByUserType(req.params.adminId, req.params.userType));
+const sendSMS = getAPIResponse(req => Event.sendSMS(req.body), { skipNotFoundValidation: true });
 
 router.get('/', getEvents);
 router.get('/get-events-by-admin', getEventsByAdmin);
@@ -33,6 +34,7 @@ router.post('/create-token-fan', checkFan, validate(paramValidation.createTokenF
 router.post('/create-token-host', checkCelebHost, validate(paramValidation.createTokenHost), createTokenHostCeleb('host'));
 router.post('/create-token-celebrity', checkCelebHost, validate(paramValidation.createTokenCelebrity), createTokenHostCeleb('celebrity'));
 router.post('/create-token/:adminId/:userType', checkCelebHost, createTokenByUserType);
+router.post('/inbound-sms', sendSMS);
 
 router.delete('/:id', deleteEvent);
 export default router;
