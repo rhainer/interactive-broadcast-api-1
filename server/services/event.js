@@ -1,15 +1,14 @@
 import config from '../../config/config';
 
 const R = require('ramda');
+const request = require('request-promise-native');
 const { db } = require('./firebase');
 const { removeAllImages, updateImages } = require('./imageStorage');
 const { eventProps, timestampCreate, timestampUpdate, eventStatuses, TS, eventPublicProps } = require('./dbProperties');
 const Admin = require('./admin');
 const OpenTok = require('./opentok');
 
-const {
-  roles
-} = require('./auth');
+const { roles } = require('./auth');
 const broadcast = require('./broadcast');
 
 /** Private */
@@ -494,6 +493,12 @@ const createTokenByUserType = async (adminId, userType) => {
   return null;
 };
 
+/**
+ * Relay a fan's sms message to the proudcer of an active broadcast
+ * @param {Object} message
+ * @param {String} message.to
+ * @param {String} message.text
+ */
 const sendSMS = async (message) => {
   const messageContent = R.prop('text', message);
   if (R.isEmpty(messageContent)) {
@@ -520,6 +525,68 @@ const sendSMS = async (message) => {
   return;
 };
 
+/**
+ * Start a dial-out connection for an active broadcast
+ * @param {String} eventId
+ */
+const startSIP = async (eventId) => {
+  console.log("HEHEHREHRHERHEREHRE", eventId);
+  return await Promise.resolve({ tim: 'pike' });
+  const snapshot = await db.ref(`events/${eventId}`);
+  const event = snapshot.val();
+  if (!event) {
+    throw new Error(`Failed to create SIP connection for event ${eventId}`);
+  }
+  const adminSnapshot = await db.ref(`admins/${event.adminId}`);
+  const admin = adminSnapshot.val();
+  if (!admin) {
+    throw new Error(`Failed to find admin for event ${eventId}`);
+  }
+  const sessionId = event.stageSessionId;
+  const { otApiKey, otSecret } = admin;
+  const url = `https://api.opentok.com/v2/project/${otApiKey}/dial`;
+  const token = OpenTok.createToken(otApiKey, otSecret, stageSessionId);
+  const data = {
+    sessionId,
+    token,
+    sip: {
+      uri: '',
+      from: '',
+      headers: {},
+      auth: {
+        username: '',
+        password: '',
+      },
+      secure: false,
+    },
+  };
+
+  const res = await request.post(url, data);
+
+  // {
+  //   "sessionId": "OpenTok session ID",
+  //   "token": "A valid OpenTok token",
+  //   "sip": {
+  //     "uri": "sip:user@sip.partner.com;transport=tls",
+  //     "from": "from@example.com",
+  //     "headers": {
+  //       "headerKey": "headerValue"
+  //     },
+  //     "auth": {
+  //       "username": "username",
+  //       "password": "password"
+  //     },
+  //     "secure": true|false
+  //   }
+  // }
+
+
+}
+
+const stopSIP = () => {
+
+};
+
 export {
   getEvents,
   create,
@@ -537,5 +604,7 @@ export {
   getMostRecentEvent,
   createTokenByUserType,
   getEventsByAdmin,
-  sendSMS
+  sendSMS,
+  startSIP,
+  stopSIP,
 };
