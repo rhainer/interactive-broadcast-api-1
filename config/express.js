@@ -30,6 +30,9 @@ const allowedPaths = [
   '/api/event/get-events-by-admin',
   '/api/event/get-current-admin-event',
   '/api/event/inbound-sms',
+  '/api/event/:id/sip/start',
+  '/api/event/sip/status',
+  '/api/event/sip/answer',
 ];
 
 // parse body params and attache them to req.body

@@ -37,7 +37,7 @@ const createOTInstance = (apiKey, apiSecret) => {
  * @param {String} apiSecret
  * @param {Boolean} decryptSecret
  */
-const otInstance = (apiKey, apiSecret, decryptSecret = false) => {
+const otInstance = (apiKey, apiSecret, decryptSecret = true) => {
   if (OT[apiKey]) { return OT[apiKey]; }
   const secret = decryptSecret ? decrypt(apiSecret) : apiSecret;
   const ot = createOTInstance(apiKey, secret);
@@ -71,7 +71,7 @@ const createToken = (apiKey, apiSecret, sessionId, options) => {
  * @param {Boolean} decryptSecret
  * @returns {Promise} <Resolve => {Object}, Reject => {Error}>
  */
-const createSession = (apiKey, apiSecret, decryptSecret = false) =>
+const createSession = (apiKey, apiSecret, decryptSecret = true) =>
   new Promise((resolve, reject) => {
     const ot = otInstance(apiKey, apiSecret, decryptSecret);
     const onCreate = (err, session) => (err ? reject(err) : resolve(session));
@@ -130,6 +130,18 @@ const signal = (apiKey, apiSecret, sessionId, connectionId, message) => {
   });
 };
 
+const sipConnect = (apiKey, apiSecret, sessionId, token, sipUri, options) =>
+  new Promise((resolve, reject) => {
+    const ot = otInstance(apiKey, apiSecret);
+    ot.dial(sessionId, token, sipUri, options, (err, res) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(res);
+      }
+    });
+  });
+
 module.exports = {
   createOTInstance,
   createSession,
@@ -137,5 +149,6 @@ module.exports = {
   startArchive,
   stopArchive,
   signal,
+  sipConnect,
   otRoles
 };

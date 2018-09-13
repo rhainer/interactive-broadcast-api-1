@@ -23,7 +23,7 @@ const createTokenByUserType = getAPIResponse(req => Event.createTokenByUserType(
 const sendSMS = getAPIResponse(req => Event.sendSMS(req.body), { skipNotFoundValidation: true });
 const createSipConnection = getAPIResponse(req => Event.startSIP(req.params.id), { skipNotFoundValidation: true });
 const sipAnswer = getAPIResponse(req => Event.answerSIP(req.body), { skipNotFoundValidation: true });
-// const sipEventStatus = getAPIResponse(req => ());
+const sipEventStatus = getAPIResponse(req => Event.statusSIP(req.body), { skipNotFoundValidation: true });
 
 router.get('/', getEvents);
 router.get('/get-events-by-admin', getEventsByAdmin);
@@ -39,8 +39,8 @@ router.post('/create-token-celebrity', checkCelebHost, validate(paramValidation.
 router.post('/create-token/:adminId/:userType', checkCelebHost, createTokenByUserType);
 router.post('/inbound-sms', sendSMS);
 router.post('/:id/sip/start', createSipConnection);
-// router.post('event/sip/status', sipEventStatus);
-router.post('event/sip/answer', sipAnswer);
+router.post('/sip/status', sipEventStatus);
+router.post('/sip/answer', sipAnswer);
 
 
 router.delete('/:id', deleteEvent);

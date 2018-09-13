@@ -2,11 +2,13 @@ import config from '../../config/config';
 
 const R = require('ramda');
 const request = require('request-promise-native');
+const jwt = require('jsonwebtoken');
 const { db } = require('./firebase');
 const { removeAllImages, updateImages } = require('./imageStorage');
 const { eventProps, timestampCreate, timestampUpdate, eventStatuses, TS, eventPublicProps } = require('./dbProperties');
 const Admin = require('./admin');
 const OpenTok = require('./opentok');
+const { decrypt } = require('./encrypt');
 
 const { roles } = require('./auth');
 const broadcast = require('./broadcast');
@@ -530,70 +532,71 @@ const sendSMS = async (message) => {
   return;
 };
 
+const createJWT = (apiKey, secret) => {
+  const currentTime = Date.now() / 1000 | 0;
+  const expireTime = currentTime + (1000 * 60);
+  const payload = {
+    iss: apiKey,
+    ist: 'project',
+    iat: currentTime,
+    exp: expireTime,
+    jti: 'jwt_nonce'
+  };
+
+  return jwt.sign(payload, secret);
+};
+
 /**
  * Start a dial-out connection for an active broadcast
  * @param {String} eventId
  */
 const startSIP = async (eventId) => {
-
-  const snapshot = await db.ref(`events/${eventId}`);
+  const snapshot = await db.ref(`events/${eventId}`).once('value');
   const event = snapshot.val();
   if (!event) {
     throw new Error(`Failed to create SIP connection for event ${eventId}`);
   }
-  const adminSnapshot = await db.ref(`admins/${event.adminId}`);
+  const adminSnapshot = await db.ref(`admins/${event.adminId}`).once('value');
   const admin = adminSnapshot.val();
   if (!admin) {
     throw new Error(`Failed to find admin for event ${eventId}`);
   }
   const sessionId = event.stageSessionId;
   const { otApiKey, otSecret } = admin;
-  const url = `https://api.opentok.com/v2/project/${otApiKey}/dial`;
-  const token = OpenTok.createToken(otApiKey, otSecret, sessionId, { role: 'subscriber' });
-  const data = {
-    sessionId,
-    token,
-    sip: {
-      uri: `sip:+${12016958133}@sip.nexmo.com;transport=tls`,
-      from: '12016958133@opentok.com',
-      headers: {},
+  const url = 'sip:+12016958133@sip.nexmo.com;transport=tls';
+  const tokenData = JSON.stringify({ userType: 'sip' });
+  const token = OpenTok.createToken(otApiKey, otSecret, sessionId, { data: tokenData });
+  try {
+    const options = {
       auth: {
         username: '8127ee63',
         password: 'tdT8NzkO5UNk5n0H',
       },
       secure: false,
-    },
-  };
-
-  const res = await request.post(url, data);
-
-  // {
-  //   "sessionId": "OpenTok session ID",
-  //   "token": "A valid OpenTok token",
-  //   "sip": {
-  //     "uri": "sip:user@sip.partner.com;transport=tls",
-  //     "from": "from@example.com",
-  //     "headers": {
-  //       "headerKey": "headerValue"
-  //     },
-  //     "auth": {
-  //       "username": "username",
-  //       "password": "password"
-  //     },
-  //     "secure": true|false
-  //   }
-  // }
-
-
-}
-
-const stopSIP = () => {
-
+    };
+    const sipResult = await OpenTok.sipConnect(otApiKey, otSecret, sessionId, token, url, options);
+    console.log('SIPSIPSIP', sipResult);
+    return { status: 'ok' };
+  } catch (error) {
+    throw new Error('Failed to connect to SIP');
+  }
 };
 
+const statusSIP = () => Promise.resolve({ status: 'ok' });
+
 const answerSIP = (data) => {
-    console.dir(data);
-    return {};
+  console.log('AAAAAA', data);
+  const ncco = [
+    {
+      action: 'talk',
+      text: 'You are listening to a Call made with Voice API'
+    },
+    {
+      action: 'conversation',
+      name: 'broadcast'
+    },
+  ];
+  return Promise.resolve(ncco);
 };
 
 export {
@@ -616,5 +619,5 @@ export {
   sendSMS,
   answerSIP,
   startSIP,
-  stopSIP,
+  statusSIP,
 };
