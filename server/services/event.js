@@ -551,6 +551,7 @@ const createJWT = (apiKey, secret) => {
  * @param {String} eventId
  */
 const startSIP = async (eventId) => {
+  console.log("Dialing out via SIP form startSIP", eventId);
   const snapshot = await db.ref(`events/${eventId}`).once('value');
   const event = snapshot.val();
   if (!event) {
