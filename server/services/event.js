@@ -557,6 +557,8 @@ const startSIP = async (eventId) => {
   if (!event) {
     throw new Error(`Failed to create SIP connection for event ${eventId}`);
   }
+  const confBridgeNum = event.confBridgeNumber;
+  console.log("conference bridge number = ", confBridgeNum);
   const adminSnapshot = await db.ref(`admins/${event.adminId}`).once('value');
   const admin = adminSnapshot.val();
   if (!admin) {
@@ -564,7 +566,8 @@ const startSIP = async (eventId) => {
   }
   const sessionId = event.stageSessionId;
   const { otApiKey, otSecret } = admin;
-  const url = 'sip:+12016958133@sip.nexmo.com;transport=tls';
+  const url = `sip:+${confBridgeNum}@sip.nexmo.com;transport=tls`;
+  console.log("SIP URL = ", url);
   const tokenData = JSON.stringify({ userType: 'sip' });
   const token = OpenTok.createToken(otApiKey, otSecret, sessionId, { data: tokenData });
   try {
